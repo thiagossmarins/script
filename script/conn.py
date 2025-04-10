@@ -1,5 +1,5 @@
 import psycopg2;
-from psycopg2 import extensions
+from psycopg2 import extensions;
 
 try:
     conn = psycopg2.connect(
