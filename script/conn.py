@@ -12,8 +12,6 @@ try:
     
     if conn.status == extensions.STATUS_READY:
         print("Conexão bem sucedida")
-    
-    conn.close()
 
 except psycopg2.Error as e:
     print("Erro na conexão:", e)
