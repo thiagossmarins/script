@@ -1,41 +1,39 @@
-from conn import conn;
-import json;
+from conn import conn
+import json
 
-cursor = conn.cursor();
+cursor = conn.cursor()
 
 with open('json/allCharsUpdated.json', 'r', encoding='utf-8') as file:
-    dados = json.load(file);
+    dadosCharacters = json.load(file)
 
-print("Dados carregados do JSON:");
-print(json.dumps(dados, indent=4, ensure_ascii=False));
+with open('json/allLocations.json', 'r', encoding='utf-8') as file:
+    dadosLocations = json.load(file)
 
+with open('json/allEpisodesUpdated.json', 'r', encoding='utf-8') as file:
+    dadosEpisodes = json.load(file)
+
+print("Dados carregados do JSON:")
+
+# SCRIPT TO POPULATE DATABASE WITH allCharsUpdated.json
 cursor.execute("""
         CREATE TABLE IF NOT EXISTS personagens (
             id INT PRIMARY KEY,
             name VARCHAR(100),
             status VARCHAR(50),
-            species VARCHAR(50),
+            species VARCHAR(50),               
             type VARCHAR(50),
             gender VARCHAR(10),
-            origin_name VARCHAR(100),
-            location_name VARCHAR(100),
-            location_url VARCHAR(255),
-            image_url VARCHAR(255),
-            episode_urls TEXT[],  -- Array de URLs para episódios
-            character_url VARCHAR(255),
-            created TIMESTAMP
+            image VARCHAR(255)
         );
     """
 )
 
-for personagem in dados:
-  cursor.execute("""
+for personagem in dadosCharacters:
+    cursor.execute("""
     INSERT INTO personagens (
-        id, name, status, species, type, gender,
-        origin_name, location_name, location_url, 
-        image_url, episode_urls, character_url, created
+        id, name, status, species, type, gender, image
     )
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    VALUES (%s, %s, %s, %s, %s, %s, %s)
     ON CONFLICT (id) DO NOTHING
     """, (
         personagem['id'],
@@ -44,21 +42,65 @@ for personagem in dados:
         personagem['species'],
         personagem['type'],
         personagem['gender'],
-        personagem['origin']['name'],
-        personagem['location']['name'],
-        personagem['location']['url'],
         personagem['image'],
-        personagem['episode'],
-        personagem['url'],
-        personagem['created']
     )
-  )
+)
 
-  conn.commit()
+# SCRIPT TO POPULATE DATABASE WITH allLocations.json
+cursor.execute("""
+        CREATE TABLE IF NOT EXISTS location (
+            id INT PRIMARY KEY,
+            name VARCHAR(100),
+            type VARCHAR(50),
+            dimension VARCHAR(100)
+        );
+    """
+)
 
-  # Fechar o cursor e a conexão
-  # cursor.close()
-  # conn.close()
+for location in dadosLocations:
+    cursor.execute("""
+    INSERT INTO location (
+        id, name, type, dimension
+    )
+    VALUES (%s, %s, %s, %s)
+    ON CONFLICT (id) DO NOTHING
+    """, (
+        location['id'],
+        location['name'],
+        location['type'],
+        location['dimension']
+    )
+)
 
+# SCRIPT TO POPULATE DATABASE WITH allEpisodesUpdated.json
+cursor.execute("""
+        CREATE TABLE IF NOT EXISTS episodes (
+            id INT PRIMARY KEY,
+            name VARCHAR(100),
+            air_date VARCHAR(50),
+            episode VARCHAR(100)
+        );
+    """
+)
+
+for episodes in dadosEpisodes:
+    cursor.execute("""
+    INSERT INTO episodes (
+        id, name, air_date, episode
+    )
+    VALUES (%s, %s, %s, %s)
+    ON CONFLICT (id) DO NOTHING
+    """, (
+        episodes['id'],
+        episodes['name'],
+        episodes['air_date'],
+        episodes['episode']
+    )
+)
+
+conn.commit()
+
+if conn:
+    print("Conexão bem-sucedida.")
 else:
     print("Falha na conexão com o banco de dados.")
