@@ -52,7 +52,8 @@ cursor.execute("""
             id INT PRIMARY KEY,
             name VARCHAR(100),
             type VARCHAR(50),
-            dimension VARCHAR(100)
+            dimension VARCHAR(100),
+            residents_count INTEGER
         );
     """
 )
@@ -60,15 +61,16 @@ cursor.execute("""
 for location in dadosLocations:
     cursor.execute("""
     INSERT INTO location (
-        id, name, type, dimension
+        id, name, type, dimension, residents_count
     )
-    VALUES (%s, %s, %s, %s)
+    VALUES (%s, %s, %s, %s, %s)
     ON CONFLICT (id) DO NOTHING
     """, (
         location['id'],
         location['name'],
         location['type'],
-        location['dimension']
+        location['dimension'],
+        len(location['residents'])
     )
 )
 
