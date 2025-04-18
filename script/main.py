@@ -16,7 +16,7 @@ print("Dados carregados do JSON:")
 
 # SCRIPT TO POPULATE DATABASE WITH allCharsUpdated.json
 cursor.execute("""
-        CREATE TABLE IF NOT EXISTS personagens (
+        CREATE TABLE IF NOT EXISTS characters (
             id INT PRIMARY KEY,
             name VARCHAR(100),
             status VARCHAR(50),
@@ -28,27 +28,27 @@ cursor.execute("""
     """
 )
 
-for personagem in dadosCharacters:
+for characters in dadosCharacters:
     cursor.execute("""
-    INSERT INTO personagens (
+    INSERT INTO characters (
         id, name, status, species, type, gender, image
     )
     VALUES (%s, %s, %s, %s, %s, %s, %s)
     ON CONFLICT (id) DO NOTHING
     """, (
-        personagem['id'],
-        personagem['name'],
-        personagem['status'],
-        personagem['species'],
-        personagem['type'],
-        personagem['gender'],
-        personagem['image'],
+        characters['id'],
+        characters['name'],
+        characters['status'],
+        characters['species'],
+        characters['type'],
+        characters['gender'],
+        characters['image'],
     )
 )
 
 # SCRIPT TO POPULATE DATABASE WITH allLocations.json
 cursor.execute("""
-        CREATE TABLE IF NOT EXISTS location (
+        CREATE TABLE IF NOT EXISTS locations (
             id INT PRIMARY KEY,
             name VARCHAR(100),
             type VARCHAR(50),
@@ -58,19 +58,19 @@ cursor.execute("""
     """
 )
 
-for location in dadosLocations:
+for locations in dadosLocations:
     cursor.execute("""
-    INSERT INTO location (
+    INSERT INTO locations (
         id, name, type, dimension, residents_count
     )
     VALUES (%s, %s, %s, %s, %s)
     ON CONFLICT (id) DO NOTHING
     """, (
-        location['id'],
-        location['name'],
-        location['type'],
-        location['dimension'],
-        len(location['residents'])
+        locations['id'],
+        locations['name'],
+        locations['type'],
+        locations['dimension'],
+        len(locations['residents'])
     )
 )
 
