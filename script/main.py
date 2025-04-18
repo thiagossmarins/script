@@ -26,7 +26,7 @@ cursor.execute("""
             image VARCHAR(255)
         );
     """
-)
+               )
 
 for characters in dadosCharacters:
     cursor.execute("""
@@ -44,7 +44,7 @@ for characters in dadosCharacters:
         characters['gender'],
         characters['image'],
     )
-)
+    )
 
 # SCRIPT TO POPULATE DATABASE WITH allLocations.json
 cursor.execute("""
@@ -56,7 +56,7 @@ cursor.execute("""
             residents_count INTEGER
         );
     """
-)
+            )
 
 for locations in dadosLocations:
     cursor.execute("""
@@ -72,7 +72,7 @@ for locations in dadosLocations:
         locations['dimension'],
         len(locations['residents'])
     )
-)
+    )
 
 # SCRIPT TO POPULATE DATABASE WITH allEpisodesUpdated.json
 cursor.execute("""
@@ -83,7 +83,7 @@ cursor.execute("""
             episode VARCHAR(100)
         );
     """
-)
+            )
 
 for episodes in dadosEpisodes:
     cursor.execute("""
@@ -98,7 +98,35 @@ for episodes in dadosEpisodes:
         episodes['air_date'],
         episodes['episode']
     )
-)
+    )
+
+cursor.execute("""
+    CREATE TABLE IF NOT EXISTS characters_episodes (
+        episode_id INT,
+        character_id INT,
+        PRIMARY KEY (episode_id, character_id),
+        FOREIGN KEY (episode_id) REFERENCES episodes(id),
+        FOREIGN KEY (character_id) REFERENCES characters(id)
+    )
+""")
+
+for episode in dadosEpisodes:
+    episode_id = episode['id']
+    for character_url in episode['characters']:
+        character_id = int(character_url.split(
+            '/')[-1]) 
+
+        cursor.execute("""
+            INSERT INTO characters_episodes (
+                episode_id, character_id
+            )
+            VALUES (%s, %s)
+            ON CONFLICT (episode_id, character_id) DO NOTHING
+        """, (
+            episode_id,
+            character_id
+        )
+        )
 
 conn.commit()
 
