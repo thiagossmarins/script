@@ -14,38 +14,6 @@ with open('json/allEpisodesUpdated.json', 'r', encoding='utf-8') as file:
 
 print("Dados carregados do JSON:")
 
-# SCRIPT TO POPULATE DATABASE WITH allCharsUpdated.json
-cursor.execute("""
-        CREATE TABLE IF NOT EXISTS characters (
-            id INT PRIMARY KEY,
-            name VARCHAR(100),
-            status VARCHAR(50),
-            species VARCHAR(50),               
-            type VARCHAR(50),
-            gender VARCHAR(10),
-            image VARCHAR(255)
-        );
-    """
-               )
-
-for characters in dadosCharacters:
-    cursor.execute("""
-    INSERT INTO characters (
-        id, name, status, species, type, gender, image
-    )
-    VALUES (%s, %s, %s, %s, %s, %s, %s)
-    ON CONFLICT (id) DO NOTHING
-    """, (
-        characters['id'],
-        characters['name'],
-        characters['status'],
-        characters['species'],
-        characters['type'],
-        characters['gender'],
-        characters['image'],
-    )
-    )
-
 # SCRIPT TO POPULATE DATABASE WITH allLocations.json
 cursor.execute("""
         CREATE TABLE IF NOT EXISTS locations (
@@ -71,6 +39,56 @@ for locations in dadosLocations:
         locations['type'],
         locations['dimension'],
         len(locations['residents'])
+    )
+    )
+
+# SCRIPT TO POPULATE DATABASE WITH allCharsUpdated.json
+cursor.execute("""
+        CREATE TABLE IF NOT EXISTS characters (
+            id INT PRIMARY KEY,
+            name VARCHAR(100),
+            status VARCHAR(50),
+            species VARCHAR(50),               
+            type VARCHAR(50),
+            gender VARCHAR(10),
+            image VARCHAR(255),
+            origin_id INT,
+            location_id INT,
+            FOREIGN KEY (origin_id) REFERENCES locations(id),
+            FOREIGN KEY (location_id) REFERENCES locations(id)
+        );
+    """
+            )
+            
+def extract_id_of_the_url(url):
+    if url:
+        partes = url.strip('/').split('/')
+        if partes and partes[-1].isdigit():
+            return int(partes[-1])
+    return None
+
+print('cheguei aqui ')
+
+for characters in dadosCharacters:
+    origin_id = extract_id_of_the_url(characters['origin']['url'])
+    location_id = extract_id_of_the_url(characters['location']['url'])
+
+    cursor.execute("""
+    INSERT INTO characters (
+        id, name, status, species, type, gender, image, origin_id, location_id
+    )
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+    ON CONFLICT (id) DO NOTHING
+    """, (
+        characters['id'],
+        characters['name'],
+        characters['status'],
+        characters['species'],
+        characters['type'],
+        characters['gender'],
+        characters['image'],
+        origin_id,
+        location_id
     )
     )
 
