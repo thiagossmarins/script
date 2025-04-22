@@ -20,8 +20,7 @@ cursor.execute("""
             id INT PRIMARY KEY,
             name VARCHAR(100),
             type VARCHAR(50),
-            dimension VARCHAR(100),
-            residents_count INTEGER
+            dimension VARCHAR(100)
         );
     """
             )
@@ -29,16 +28,15 @@ cursor.execute("""
 for locations in dadosLocations:
     cursor.execute("""
     INSERT INTO locations (
-        id, name, type, dimension, residents_count
+        id, name, type, dimension
     )
-    VALUES (%s, %s, %s, %s, %s)
+    VALUES (%s, %s, %s, %s)
     ON CONFLICT (id) DO NOTHING
     """, (
         locations['id'],
         locations['name'],
         locations['type'],
-        locations['dimension'],
-        len(locations['residents'])
+        locations['dimension']
     )
     )
 
@@ -59,15 +57,13 @@ cursor.execute("""
         );
     """
             )
-            
+
 def extract_id_of_the_url(url):
     if url:
         partes = url.strip('/').split('/')
         if partes and partes[-1].isdigit():
             return int(partes[-1])
     return None
-
-print('cheguei aqui ')
 
 for characters in dadosCharacters:
     origin_id = extract_id_of_the_url(characters['origin']['url'])
